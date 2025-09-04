@@ -33,10 +33,13 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch.actions import ExecuteProcess
-from launch_ros.substitutions import FindPackageShare, PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+
+from launch.actions import RegisterEventHandler
+from launch.event_handlers import OnProcessExit
 
 
 def generate_launch_description():
@@ -85,5 +88,5 @@ def generate_launch_description():
         gazebo_launch,
         rviz_node,
         load_joint_state_controller,
-        load_head_controller,
+        RegisterEventHandler(OnProcessExit(target_action=load_joint_state_controller, on_exit=[load_head_controller])),
     ])
