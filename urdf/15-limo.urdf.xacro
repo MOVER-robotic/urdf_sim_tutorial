@@ -1,0 +1,722 @@
+<?xml version="1.0"?>
+<robot name="diff_drive" xmlns:xacro="http://ros.org/wiki/xacro">
+    <xacro:arg name="control_path" default="$(find urdf_sim_tutorial)/config/limo.yaml"/>
+
+    <xacro:property name="control_path" value="$(arg control_path)"/>
+
+    <xacro:property name="wheel_base" value="0.1974"/>
+    <xacro:property name="wheel_track" value="0.176"/>
+    <xacro:property name="wheel_radius" value="0.0482" />
+    <xacro:property name="base_clearance" value="-0.0" />
+    <xacro:property name="M_PI" value="3.1415926536"/>
+
+    <xacro:macro name="limo_base" params="object_name:='limo_base' frame_link='base_link' parent_link:='base_footprint' xyz:='0 0 0' rpy:='0 0 0' color:='false' simple:='true'">
+        <xacro:property
+            name="mass"
+            value="2.1557"/>
+        <xacro:property
+            name="base_length"
+            value="0.2938"/>
+        <xacro:property
+            name="base_width"
+            value="0.12"/>
+        <xacro:property
+            name="base_height"
+            value="0.125"/>
+        <xacro:property
+            name="M_PI"
+            value="3.1415926536"/>
+        
+        <link
+            name="${frame_link}">
+            <inertial>
+                <origin
+                    xyz="-0.0014 0 -0.05"
+                    rpy="0 0 1.57"/>
+                <mass
+                    value="${mass}"/>
+                <inertia
+                    ixx="${mass * (base_width * base_width + base_height * base_height) / 12.0}"
+                    ixy="0.0"
+                    ixz="0.0"
+                    iyy="${mass * (base_length * base_length + base_height * base_height) / 12.0}"
+                    iyz="0.0"
+                    izz="${mass * (base_length * base_length + base_width * base_width) / 12.0}"/>
+            </inertial>
+            <visual
+                name="${object_name}_visual">
+                <origin
+                    xyz="-0.0014 0 -0.05"
+                    rpy="0 0 1.57"/>
+                <geometry>
+                    <xacro:if value="${color}">
+                        <mesh
+                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.dae"
+                            scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:unless value="${color}">
+                        <mesh
+                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.stl"
+                            scale="0.001 0.001 0.001"/>
+                    </xacro:unless>
+                </geometry>
+                <material
+                    name="${object_name}_material">
+                    <color
+                        rgba="1 1 1 1"/>
+                    <texture
+                        filename=""/>
+                </material>
+            </visual>
+            <collision
+                name="${object_name}_collision">
+                <xacro:if value="${simple}">
+                    <origin
+                        xyz="0 0 ${base_height/2 - 0.025}"
+                        rpy="0 0 0"/>
+                    <geometry>
+                        <box
+                            size="${base_length} ${base_width} ${base_height}"/>
+                    </geometry>
+                </xacro:if>
+                <xacro:unless value="${simple}">
+                    <origin
+                        xyz="-0.0014 0 -0.05"
+                        rpy="0 0 1.57"/>
+                    <geometry>
+                        <xacro:if value="${color}">
+                            <mesh
+                                filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.dae"
+                                scale="1 1 1"/>
+                        </xacro:if>
+                        <xacro:unless value="${color}">
+                            <mesh
+                                filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.stl"
+                                scale="0.001 0.001 0.001"/>
+                        </xacro:unless>
+                    </geometry>
+                </xacro:unless>
+            </collision>
+        </link>
+
+        <joint
+            name="${object_name}_joint"
+            type="fixed">
+            <origin
+                xyz="${xyz}"
+                rpy="${rpy}"/>
+            <parent
+                link="${parent_link}"/>
+            <child
+                link="${frame_link}"/>
+        </joint>
+
+        <gazebo reference="${frame_link}">
+            <gravity>true</gravity>
+            <kp>1000000.0</kp>
+            <kd>1.0</kd>
+            <mu1>0.8</mu1>
+            <mu2>0.8</mu2>
+            <maxVel>0.0</maxVel>
+            <minDepth>0.001</minDepth>
+        </gazebo>
+
+    </xacro:macro>
+
+    <xacro:macro name="limo_wheel" params="object_name:='limo_wheel' joint_name='limo_wheel_joint' frame_link='limo_wheel_link' parent_link:='base_link' xyz:='0 0 0' rpy:='0 0 0' direction:='1' color:='false' simple:='true'">
+        <xacro:property
+            name="mass"
+            value="0.5"/>
+        <xacro:property
+            name="wheel_height"
+            value="0.045" />
+        <xacro:property
+            name="wheel_radius"
+            value="0.0482" />
+        <xacro:property
+            name="M_PI"
+            value="3.1415926536"/>
+        
+        <link
+            name="${frame_link}">
+            <inertial>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+                <mass
+                    value="${mass}"/>
+                <inertia
+                    ixx="${(3 * wheel_radius * wheel_radius + wheel_height * wheel_height) / 12.0}"
+                    iyy="${(3 * wheel_radius * wheel_radius + wheel_height * wheel_height) / 12.0}"
+                    izz="${wheel_radius * wheel_radius / 2.0}"
+                    ixy="0.0"
+                    ixz="0.0"
+                    iyz="0.0"/>
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 ${-wheel_height/2 + 0.001} 0"
+                    rpy="0 0 0"/>
+                <geometry>
+                    <xacro:if value="${color}">
+                        <mesh
+                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.dae"
+                            scale="1 1 1"/>
+                    </xacro:if>
+                    <xacro:unless value="${color}">
+                        <mesh
+                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.stl"
+                            scale="0.001 0.001 0.001"/>
+                    </xacro:unless>
+                </geometry>
+                <material
+                    name="${object_name}_material">
+                    <color
+                        rgba="0 0 0 1"/>
+                    <texture
+                        filename=""/>
+                </material>
+            </visual>
+            <collision>
+                <xacro:if value="${simple}">
+                    <origin
+                        xyz="0 0 0"
+                        rpy="${M_PI/2} 0 0"/>
+                    <geometry>
+                        <cylinder
+                            radius="${wheel_radius}"
+                            length="0.001"/>
+                    </geometry>
+                </xacro:if>
+                <xacro:unless value="${simple}">
+                    <origin
+                        xyz="0 ${-wheel_height/2 + 0.001} 0"
+                        rpy="0 0 0"/>
+                    <geometry>
+                        <xacro:if value="${color}">
+                            <mesh
+                                filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.dae"
+                                scale="1 1 1"/>
+                        </xacro:if>
+                        <xacro:unless value="${color}">
+                            <mesh
+                                filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.stl"
+                                scale="0.001 0.001 0.001"/>
+                        </xacro:unless>
+                    </geometry>
+                </xacro:unless>
+            </collision>
+        </link>
+
+        <joint
+            name="${joint_name}"
+            type="continuous">
+            <origin
+                xyz="${xyz}"
+                rpy="${rpy}"/>
+            <parent
+                link="${parent_link}"/>
+            <child
+                link="${frame_link}"/>
+            <axis
+                xyz="0 ${direction} 0"/>
+        </joint>
+
+        <transmission
+            name="${object_name}_trans"
+            type="SimpleTransmission">
+            <type>
+                transmission_interface/SimpleTransmission
+            </type>
+            <joint
+                name="${joint_name}">
+                <hardwareInterface>
+                    hardware_interface/VelocityJointInterface
+                </hardwareInterface>
+            </joint>
+            <actuator
+                name="${object_name}_actuator">
+                <mechanicalReduction>
+                    1
+                </mechanicalReduction>
+            </actuator>
+        </transmission>
+
+        <gazebo reference="${frame_link}">
+            <material>Gazebo/Black</material>
+            <kp>1000000.0</kp>
+            <kd>1.0</kd>
+            <mu1>1.0</mu1>
+            <mu2>0.5</mu2>
+            <fdir1>1 0 0</fdir1>
+        </gazebo>
+
+    </xacro:macro>
+
+    <xacro:macro name="imu" params="object_name:='imu' topic='imu/data' frame_link='imu_link' parent_link:='base_link' xyz:='0 0 0' rpy:='0 0 0'">
+        <xacro:property
+            name="mass"
+            value="0.01"/>
+        <xacro:property
+            name="x"
+            value="0.03"/>
+        <xacro:property
+            name="y"
+            value="0.02"/>
+        <xacro:property
+            name="z"
+            value="0.01"/>
+        <xacro:property
+            name="M_PI"
+            value="3.1415926536"/>
+        
+        <link
+            name="${frame_link}">
+            <inertial>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+                <mass
+                    value="${mass}"/>
+                <inertia
+                    ixx="${mass * (y * y + z * z) / 12.0}"
+                    ixy="0.0"
+                    ixz="0.0"
+                    iyy="${mass * (x * x + z * z) / 12.0}"
+                    iyz="0.0"
+                    izz="${mass * (x * x + y * y) / 12.0}"/>
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+                <geometry>
+                    <box
+                        size="${x} ${y} ${z}"/>
+                </geometry>
+                <material
+                    name="${object_name}_material">
+                    <color
+                        rgba="1 0.5 0 1"/>
+                    <texture
+                        filename=""/>
+                </material>
+                <material name="black"/>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+                <geometry>
+                    <box
+                        size="${x} ${y} ${z}"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <joint
+            name="${object_name}_joint"
+            type="fixed">
+            <origin
+                xyz="${xyz}"
+                rpy="${rpy}"/>
+            <parent
+                link="${parent_link}"/>
+            <child
+                link="${frame_link}"/>
+        </joint>
+
+        <gazebo reference="${frame_link}">
+            <material>Gazebo/Orange</material>
+            <gravity>true</gravity>
+            <kp>1000000.0</kp>
+            <kd>1.0</kd>
+            <mu1>0.8</mu1>
+            <mu2>0.8</mu2>
+            <maxVel>0.0</maxVel>
+            <minDepth>0.001</minDepth>
+
+            <sensor name="${object_name}_sensor" type="imu">
+                <always_on>true</always_on>
+                <update_rate>100</update_rate>
+                <visualize>true</visualize>
+                <plugin name="${object_name}_plugin" filename="libgazebo_ros_imu_sensor.so">
+                    <ros>
+                        <namespace>/</namespace>
+                        <remapping>${object_name}_plugin/out:=${topic}</remapping>
+                    </ros>
+                    <update_rate>100</update_rate>
+                    <gaussian_noise>0.0001</gaussian_noise>
+                    <frame_name>${frame_link}</frame_name>
+                </plugin>
+                <pose>0 0 0 0 0 0</pose>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:macro name="ydlidar" params="object_name:='ydlidar' topic='scan' frame_link='ydlidar_link' parent_link:='base_link' xyz:='0 0 0' rpy:='0 0 0'">
+        <xacro:property
+            name="mass"
+            value="0.1"/>
+        <xacro:property
+            name="radius"
+            value="0.03"/>
+        <xacro:property
+            name="height"
+            value="0.014"/>
+        <xacro:property
+            name="M_PI"
+            value="3.1415926536"/>
+
+        <link
+            name="${frame_link}">
+            <inertial>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+                <mass
+                    value="${mass}"/>
+                <inertia
+                    ixx="${( 3 * radius * radius + height * height ) / 12.0}"
+                    ixy="0.0"
+                    ixz="0.0"
+                    iyy="${( 3 * radius * radius + height * height ) / 12.0}"
+                    iyz="0.0"
+                    izz="${radius * radius / 2.0}"/>
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+                <geometry>
+                    <cylinder
+                        radius="${radius}"
+                        length="${height}"/>
+                </geometry>
+                <material
+                    name="${object_name}_material">
+                    <color
+                        rgba="0 0 1 1"/>
+                    <texture
+                        filename=""/>
+                </material>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="0 0 0"/>
+                <geometry>
+                    <cylinder
+                        radius="${radius}"
+                        length="${height}"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <joint
+            name="${object_name}_joint"
+            type="fixed">
+            <origin
+                xyz="${xyz}"
+                rpy="${rpy}"/>
+            <parent
+                link="${parent_link}"/>
+            <child
+                link="${frame_link}"/>
+        </joint>
+
+        <gazebo reference="${frame_link}">
+            <sensor name="${object_name}" type="ray">
+                <pose>0 0 0 0 0 0</pose>
+                <visualize>true</visualize>
+                <update_rate>10</update_rate>
+                <ray>
+                    <scan>
+                        <horizontal>
+                            <samples>461</samples>
+                            <resolution>1</resolution>
+                            <min_angle>-${M_PI}</min_angle>
+                            <max_angle>${M_PI}</max_angle>
+                        </horizontal>
+                    </scan>
+                    <range>
+                        <min>0.05</min>
+                        <max>15.0</max>
+                        <resolution>0.015</resolution>
+                    </range>
+                    <noise>
+                        <type>gaussian</type>
+                        <mean>0.0</mean>
+                        <stddev>0.01</stddev>
+                    </noise>
+                </ray>
+                <plugin name="${object_name}_plugin" filename="libgazebo_ros_ray_sensor.so">
+                    <ros>
+                        <namespace>/</namespace>
+                        <remapping>${object_name}_plugin/out:=${topic}</remapping>
+                    </ros>
+                    <output_type>sensor_msgs/LaserScan</output_type>
+                    <frame_name>${frame_link}</frame_name>
+                    <gaussian_noise>0.01</gaussian_noise>
+                </plugin>
+            </sensor>
+        </gazebo>
+
+    </xacro:macro>
+
+    <xacro:macro name="dabai" params="object_name:='dabai' topic='dabai' image_link='dabai_image_link' point_link='dabai_point_link' parent_link:='link' xyz:='0 0 0' rpy:='0 0 0'">
+
+        <xacro:property
+            name="mass"
+            value="0.1"/>
+        <xacro:property
+            name="length"
+            value="0.0195"/>
+        <xacro:property
+            name="width"
+            value="0.06"/>
+        <xacro:property
+            name="height"
+            value="0.015"/>
+        <xacro:property
+            name="M_PI"
+            value="3.1415926536"/>
+        
+        <link
+            name="${image_link}">
+            <inertial>
+                <origin
+                    xyz="0 0 0"
+                    rpy="${0*M_PI/180} ${0*M_PI/180} ${0*M_PI/180}"/>
+                <mass
+                    value="${mass}"/>
+                <inertia
+                    ixx="${(width * width + height * height) / 12.0}"
+                    ixy="0.0"
+                    ixz="0.0"
+                    iyy="${(length * length + height * height) / 12.0}"
+                    iyz="0.0"
+                    izz="${(length * length + width * width) / 12.0}"/>
+            </inertial>
+            <visual>
+                <origin
+                    xyz="0 0 0"
+                    rpy="${0*M_PI/180} ${0*M_PI/180} ${0*M_PI/180}"/>
+                <geometry>
+                    <box 
+                        size="${length} ${width} ${height}"/>
+                </geometry>
+                <material
+                    name="${object_name}_material">
+                    <color
+                        rgba="0 1 0 1"/>
+                    <texture
+                        filename=""/>
+                </material>
+            </visual>
+            <collision>
+                <origin
+                    xyz="0 0 0"
+                    rpy="${0*M_PI/180} ${0*M_PI/180} ${0*M_PI/180}"/>
+                <geometry>
+                    <box 
+                        size="${length} ${width} ${height}"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <link
+            name="${point_link}"/>
+
+        <joint
+            name="${object_name}_image_joint"
+            type="fixed">
+            <origin
+                xyz="${xyz}"
+                rpy="${rpy}"/>
+            <parent
+                link="${parent_link}"/>
+            <child
+                link="${image_link}"/>
+        </joint>
+
+        <joint
+            name="${object_name}_point_joint"
+            type="fixed">
+            <origin
+                xyz="0 0 0"
+                rpy="${-90*M_PI/180} ${0*M_PI/180} ${-90*M_PI/180}"/>
+            <parent
+                link="${image_link}"/>
+            <child
+                link="${point_link}"/>
+        </joint>
+
+        <gazebo reference="${image_link}">
+            <sensor name="${object_name}_depth_sensor" type="depth">
+                <always_on>true</always_on>
+                <update_rate>30</update_rate>
+                <visualize>true</visualize>
+                <camera>
+                    <horizontal_fov>${60*M_PI/180}</horizontal_fov>
+                    <image>
+                        <width>640</width>
+                        <height>480</height>
+                        <format>R8G8B8</format>
+                    </image>
+                    <clip>
+                        <near>0.1</near>
+                        <far>8.0</far>
+                    </clip>
+                </camera>
+                <plugin name="${object_name}_plugin" filename="libgazebo_ros_camera.so">
+                    <ros>
+                        <namespace>/</namespace>
+                        <remapping>${object_name}_depth_sensor/camera_info:=${topic}/camera_info</remapping>
+                        <remapping>${object_name}_depth_sensor/depth/camera_info:=${topic}/depth/camera_info</remapping>
+                        <remapping>${object_name}_depth_sensor/image_raw:=${topic}/image_raw</remapping>
+                        <remapping>${object_name}_depth_sensor/depth/image_raw:=${topic}/depth/image_raw</remapping>
+                        <remapping>${object_name}_depth_sensor/points:=${topic}/points</remapping>
+                    </ros>
+                    <frame_name>${point_link}</frame_name>
+                    <point_cloud_cutoff>0.2</point_cloud_cutoff>
+                </plugin>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:macro name="simulation_control" params="control_path:='$(find urdf_sim_tutorial)/config/limo.yaml'">
+        <ros2_control name="ros2_control_system" type="system">
+            <hardware>
+                <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+            </hardware>
+
+            <joint name="wheel_front_left_joint">
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+                <command_interface name="position"/>
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+            </joint>
+
+            <joint name="wheel_front_right_joint">
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+                <command_interface name="position"/>
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+            </joint>
+
+            <joint name="wheel_rear_left_joint">
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+                <command_interface name="position"/>
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+            </joint>
+
+            <joint name="wheel_rear_right_joint">
+                <state_interface name="position"/>
+                <state_interface name="velocity"/>
+                <command_interface name="position"/>
+                <command_interface name="velocity">
+                    <param name="min">-10</param>
+                    <param name="max">10</param>
+                </command_interface>
+            </joint>
+        </ros2_control>
+
+        <gazebo>
+            <plugin name="gazebo_ros2_control_plugin" filename="libgazebo_ros2_control.so">
+                <parameters>${control_path}</parameters>
+            </plugin>
+        </gazebo>
+    </xacro:macro>
+
+    <link
+        name="base_footprint"/>
+
+    <xacro:limo_base
+        object_name="base"
+        frame_link="base_link"
+        parent_link="base_footprint"
+        xyz="0 0 ${wheel_radius}"
+        rpy="0 0 0"
+        simple="false"
+        color="false"/>
+
+    <xacro:limo_wheel
+        object_name="wheel_front_left"
+        joint_name="wheel_front_left_joint"
+        frame_link="wheel_front_left_link"
+        parent_link="base_link"
+        xyz="${wheel_base/2} ${wheel_track/2} ${base_clearance}"
+        rpy="0 0 0"
+        direction="1"
+        color="false"/>
+
+    <xacro:limo_wheel
+        object_name="wheel_front_right"
+        joint_name="wheel_front_right_joint"
+        frame_link="wheel_front_right_link"
+        parent_link="base_link"
+        xyz="${wheel_base/2} ${-wheel_track/2} ${base_clearance}"
+        rpy="0 0 0"
+        direction="1"
+        color="false"/>
+
+    <xacro:limo_wheel
+        object_name="wheel_rear_left"
+        joint_name="wheel_rear_left_joint"
+        frame_link="wheel_rear_left_link"
+        parent_link="base_link"
+        xyz="${-wheel_base/2} ${wheel_track/2} ${base_clearance}"
+        rpy="0 0 0"
+        direction="1"
+        color="false"/>
+
+    <xacro:limo_wheel
+        object_name="wheel_rear_right"
+        joint_name="wheel_rear_right_joint"
+        frame_link="wheel_rear_right_link"
+        parent_link="base_link"
+        xyz="${-wheel_base/2} ${-wheel_track/2} ${base_clearance}"
+        rpy="0 0 0"
+        direction="1"
+        color="false"/>
+
+    <xacro:imu
+        object_name="imu"
+        topic="imu/data"
+        frame_link="imu_link"
+        parent_link="base_link"
+        xyz="0 0 0"
+        rpy="0 0 0"/>
+
+    <xacro:ydlidar
+        object_name="lidar"
+        topic="scan"
+        frame_link="lidar_link"
+        parent_link="base_link"
+        xyz="0.1016 0 0.066"
+        rpy="0 0 0"/>
+
+    <xacro:dabai
+        object_name="dabai"
+        topic="camera"
+        image_link="camera_image_link"
+        point_link="camera_point_link"
+        parent_link="base_link"
+        xyz="0.0826 0 0.13"
+        rpy="${0*M_PI/180} ${0*M_PI/180} ${0*M_PI/180}"/>
+
+    <xacro:simulation_control
+        control_path="${control_path}"/>
+
+</robot>
