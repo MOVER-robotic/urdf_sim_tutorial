@@ -49,17 +49,21 @@ def generate_launch_description():
     model_arg = DeclareLaunchArgument('urdf_package_path',
                                       description='The path to the robot description relative to the package root',
                                       default_value='urdf/15-limo.urdf.xacro')
+    world_arg = DeclareLaunchArgument('world',
+                                      description='The world file where is located',
+                                      default_value=PathJoinSubstitution([FindPackageShare('urdf_sim_tutorial'), 'world', 'limo_world.world']))
 
     rvizconfig_arg = DeclareLaunchArgument(
         name='rvizconfig',
-        default_value=PathJoinSubstitution([FindPackageShare('urdf_sim_tutorial'), 'rviz', 'odom_urdf.rviz']),
+        default_value=PathJoinSubstitution([FindPackageShare('urdf_sim_tutorial'), 'rviz', 'limo.rviz']),
     )
 
     gazebo_launch = IncludeLaunchDescription(
         PathJoinSubstitution([FindPackageShare('urdf_sim_tutorial'), 'launch', 'gazebo.launch.py']),
         launch_arguments={
             'urdf_package': LaunchConfiguration('urdf_package'),
-            'urdf_package_path': LaunchConfiguration('urdf_package_path')
+            'urdf_package_path': LaunchConfiguration('urdf_package_path'),
+            'world': LaunchConfiguration('world')
         }.items(),
     )
 
@@ -87,6 +91,7 @@ def generate_launch_description():
     return LaunchDescription([
         package_arg,
         model_arg,
+        world_arg,
         rvizconfig_arg,
         gazebo_launch,
         rviz_node,

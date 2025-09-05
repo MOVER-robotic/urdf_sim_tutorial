@@ -50,12 +50,16 @@ def generate_launch_description():
     model_arg = DeclareLaunchArgument('urdf_package_path',
                                       description='The path to the robot description relative to the package root',
                                       default_value='urdf/08-macroed.urdf.xacro')
+    world_arg = DeclareLaunchArgument('world',
+                                      description='The world file where is located',
+                                      default_value='')
 
     empty_world_launch = IncludeLaunchDescription(
         PathJoinSubstitution([FindPackageShare('gazebo_ros'), 'launch', 'gazebo.launch.py']),
         launch_arguments={
             'gui': LaunchConfiguration('gui'),
             'pause': 'true',
+            'world': LaunchConfiguration('world')
         }.items(),
     )
 
@@ -79,6 +83,7 @@ def generate_launch_description():
         gui_arg,
         package_arg,
         model_arg,
+        world_arg,
         empty_world_launch,
         description_launch_py,
         urdf_spawner_node,

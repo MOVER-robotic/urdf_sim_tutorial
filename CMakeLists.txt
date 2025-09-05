@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(urdf_sim_tutorial)
 find_package(ament_cmake REQUIRED)
 
-install(DIRECTORY config launch meshes rviz urdf
+install(DIRECTORY config launch meshes world rviz urdf
   DESTINATION share/${PROJECT_NAME}
 )
 ament_package()
