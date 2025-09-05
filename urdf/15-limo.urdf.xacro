@@ -10,7 +10,7 @@
     <xacro:property name="base_clearance" value="-0.0" />
     <xacro:property name="M_PI" value="3.1415926536"/>
 
-    <xacro:macro name="limo_base" params="object_name:='limo_base' frame_link='base_link' parent_link:='base_footprint' xyz:='0 0 0' rpy:='0 0 0' color:='false' simple:='true'">
+    <xacro:macro name="limo_base" params="object_name:='limo_base' frame_link='base_link' parent_link:='base_footprint' xyz:='0 0 0' rpy:='0 0 0'">
         <xacro:property
             name="mass"
             value="2.1557"/>
@@ -49,16 +49,9 @@
                     xyz="-0.0014 0 -0.05"
                     rpy="0 0 1.57"/>
                 <geometry>
-                    <xacro:if value="${color}">
-                        <mesh
-                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.dae"
-                            scale="1 1 1"/>
-                    </xacro:if>
-                    <xacro:unless value="${color}">
-                        <mesh
-                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.stl"
-                            scale="0.001 0.001 0.001"/>
-                    </xacro:unless>
+                    <mesh
+                        filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.stl"
+                        scale="0.001 0.001 0.001"/>
                 </geometry>
                 <material
                     name="${object_name}_material">
@@ -70,32 +63,14 @@
             </visual>
             <collision
                 name="${object_name}_collision">
-                <xacro:if value="${simple}">
-                    <origin
-                        xyz="0 0 ${base_height/2 - 0.025}"
-                        rpy="0 0 0"/>
-                    <geometry>
-                        <box
-                            size="${base_length} ${base_width} ${base_height}"/>
-                    </geometry>
-                </xacro:if>
-                <xacro:unless value="${simple}">
-                    <origin
-                        xyz="-0.0014 0 -0.05"
-                        rpy="0 0 1.57"/>
-                    <geometry>
-                        <xacro:if value="${color}">
-                            <mesh
-                                filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.dae"
-                                scale="1 1 1"/>
-                        </xacro:if>
-                        <xacro:unless value="${color}">
-                            <mesh
-                                filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.stl"
-                                scale="0.001 0.001 0.001"/>
-                        </xacro:unless>
-                    </geometry>
-                </xacro:unless>
+                <origin
+                    xyz="-0.0014 0 -0.05"
+                    rpy="0 0 1.57"/>
+                <geometry>
+                    <mesh
+                        filename="file://$(find urdf_sim_tutorial)/meshes/limo_base.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
             </collision>
         </link>
 
@@ -123,7 +98,7 @@
 
     </xacro:macro>
 
-    <xacro:macro name="limo_wheel" params="object_name:='limo_wheel' joint_name='limo_wheel_joint' frame_link='limo_wheel_link' parent_link:='base_link' xyz:='0 0 0' rpy:='0 0 0' direction:='1' color:='false' simple:='true'">
+    <xacro:macro name="limo_wheel" params="object_name:='limo_wheel' joint_name='limo_wheel_joint' frame_link='limo_wheel_link' parent_link:='base_link' xyz:='0 0 0' rpy:='0 0 0' direction:='1'">
         <xacro:property
             name="mass"
             value="0.5"/>
@@ -158,16 +133,9 @@
                     xyz="0 ${-wheel_height/2 + 0.001} 0"
                     rpy="0 0 0"/>
                 <geometry>
-                    <xacro:if value="${color}">
-                        <mesh
-                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.dae"
-                            scale="1 1 1"/>
-                    </xacro:if>
-                    <xacro:unless value="${color}">
-                        <mesh
-                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.stl"
-                            scale="0.001 0.001 0.001"/>
-                    </xacro:unless>
+                    <mesh
+                        filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.stl"
+                        scale="0.001 0.001 0.001"/>
                 </geometry>
                 <material
                     name="${object_name}_material">
@@ -178,33 +146,14 @@
                 </material>
             </visual>
             <collision>
-                <xacro:if value="${simple}">
-                    <origin
-                        xyz="0 0 0"
-                        rpy="${M_PI/2} 0 0"/>
-                    <geometry>
-                        <cylinder
-                            radius="${wheel_radius}"
-                            length="0.001"/>
-                    </geometry>
-                </xacro:if>
-                <xacro:unless value="${simple}">
                     <origin
                         xyz="0 ${-wheel_height/2 + 0.001} 0"
                         rpy="0 0 0"/>
                     <geometry>
-                        <xacro:if value="${color}">
-                            <mesh
-                                filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.dae"
-                                scale="1 1 1"/>
-                        </xacro:if>
-                        <xacro:unless value="${color}">
-                            <mesh
-                                filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.stl"
-                                scale="0.001 0.001 0.001"/>
-                        </xacro:unless>
+                        <mesh
+                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.stl"
+                            scale="0.001 0.001 0.001"/>
                     </geometry>
-                </xacro:unless>
             </collision>
         </link>
 
@@ -647,9 +596,7 @@
         frame_link="base_link"
         parent_link="base_footprint"
         xyz="0 0 ${wheel_radius}"
-        rpy="0 0 0"
-        simple="false"
-        color="false"/>
+        rpy="0 0 0"/>
 
     <xacro:limo_wheel
         object_name="wheel_front_left"
@@ -658,8 +605,7 @@
         parent_link="base_link"
         xyz="${wheel_base/2} ${wheel_track/2} ${base_clearance}"
         rpy="0 0 0"
-        direction="1"
-        color="false"/>
+        direction="1"/>
 
     <xacro:limo_wheel
         object_name="wheel_front_right"
@@ -668,8 +614,7 @@
         parent_link="base_link"
         xyz="${wheel_base/2} ${-wheel_track/2} ${base_clearance}"
         rpy="0 0 0"
-        direction="1"
-        color="false"/>
+        direction="1"/>
 
     <xacro:limo_wheel
         object_name="wheel_rear_left"
@@ -678,8 +623,7 @@
         parent_link="base_link"
         xyz="${-wheel_base/2} ${wheel_track/2} ${base_clearance}"
         rpy="0 0 0"
-        direction="1"
-        color="false"/>
+        direction="1"/>
 
     <xacro:limo_wheel
         object_name="wheel_rear_right"
@@ -688,8 +632,7 @@
         parent_link="base_link"
         xyz="${-wheel_base/2} ${-wheel_track/2} ${base_clearance}"
         rpy="0 0 0"
-        direction="1"
-        color="false"/>
+        direction="1"/>
 
     <xacro:imu
         object_name="imu"
