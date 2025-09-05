@@ -17,7 +17,6 @@ diff_drive_base_controller:
   ros__parameters:
     type: diff_drive_controller/DiffDriveController
     publish_rate: 50.0 # You can set this higher than the controller manager update rate, but it will be throttled
-    base_frame_id: base_footprint
 
     left_wheel_names: ["wheel_front_left_joint", "wheel_rear_left_joint"]
     right_wheel_names: ["wheel_front_right_joint", "wheel_rear_right_joint"]

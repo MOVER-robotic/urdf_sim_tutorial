@@ -116,7 +116,7 @@
             name="${frame_link}">
             <inertial>
                 <origin
-                    xyz="0 0 0"
+                    xyz="0 ${-wheel_height/2 + 0.001} 0"
                     rpy="0 0 0"/>
                 <mass
                     value="${mass}"/>
@@ -146,14 +146,14 @@
                 </material>
             </visual>
             <collision>
-                    <origin
-                        xyz="0 ${-wheel_height/2 + 0.001} 0"
-                        rpy="0 0 0"/>
-                    <geometry>
-                        <mesh
-                            filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.stl"
-                            scale="0.001 0.001 0.001"/>
-                    </geometry>
+                <origin
+                    xyz="0 ${-wheel_height/2 + 0.001} 0"
+                    rpy="0 0 0"/>
+                <geometry>
+                    <mesh
+                        filename="file://$(find urdf_sim_tutorial)/meshes/limo_wheel.stl"
+                        scale="0.001 0.001 0.001"/>
+                </geometry>
             </collision>
         </link>
 
@@ -543,7 +543,6 @@
             <joint name="wheel_front_left_joint">
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
-                <command_interface name="position"/>
                 <command_interface name="velocity">
                     <param name="min">-10</param>
                     <param name="max">10</param>
@@ -553,7 +552,6 @@
             <joint name="wheel_front_right_joint">
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
-                <command_interface name="position"/>
                 <command_interface name="velocity">
                     <param name="min">-10</param>
                     <param name="max">10</param>
@@ -563,7 +561,6 @@
             <joint name="wheel_rear_left_joint">
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
-                <command_interface name="position"/>
                 <command_interface name="velocity">
                     <param name="min">-10</param>
                     <param name="max">10</param>
@@ -573,7 +570,6 @@
             <joint name="wheel_rear_right_joint">
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
-                <command_interface name="position"/>
                 <command_interface name="velocity">
                     <param name="min">-10</param>
                     <param name="max">10</param>
@@ -613,8 +609,8 @@
         frame_link="wheel_front_right_link"
         parent_link="base_link"
         xyz="${wheel_base/2} ${-wheel_track/2} ${base_clearance}"
-        rpy="0 0 0"
-        direction="1"/>
+        rpy="0 0 ${M_PI}"
+        direction="-1"/>
 
     <xacro:limo_wheel
         object_name="wheel_rear_left"
@@ -631,8 +627,8 @@
         frame_link="wheel_rear_right_link"
         parent_link="base_link"
         xyz="${-wheel_base/2} ${-wheel_track/2} ${base_clearance}"
-        rpy="0 0 0"
-        direction="1"/>
+        rpy="0 0 ${M_PI}"
+        direction="-1"/>
 
     <xacro:imu
         object_name="imu"
